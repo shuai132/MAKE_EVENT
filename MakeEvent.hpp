@@ -11,14 +11,14 @@
 
 #define _MAKE_EVENT_FUN_SET(name, ...) \
         public: \
-        void set##name##Cb(name##Cb##_t cb) { \
+        inline void set##name##Cb(name##Cb##_t cb) { \
             _cb##name = std::move(cb); \
         } \
 
 #define _MAKE_EVENT_TRI_SET(name, ...) \
         public: \
         template<typename... Args> \
-        void on##name(Args&&... args) { \
+        inline void on##name(Args&&... args) { \
             if (_cb##name) \
                 _cb##name(std::forward<Args>(args)...); \
         } \
@@ -36,14 +36,14 @@
 
 #define _MAKE_EVENT_FUN_ADD(name, ...) \
         public: \
-        void add##name##Cb(name##Cb##_t cb) { \
+        inline void add##name##Cb(name##Cb##_t cb) { \
             _cbs##name.emplace_back(std::move(cb)); \
         } \
 
 #define _MAKE_EVENT_TRI_ADD(name, ...) \
         public: \
         template<typename... Args> \
-        void on##name(Args&&... args) { \
+        inline void on##name(Args&&... args) { \
             for (const auto& cb : _cbs##name) { \
                 cb(std::forward<Args>(args)...); \
             } \
