@@ -1,4 +1,5 @@
 #include <string>
+#include <cassert>
 #include "MakeEvent.hpp"
 
 class SimpleTest {
@@ -24,6 +25,8 @@ class FullTest {
 
     MAKE_EVENT_SET(EventSetMoreArg, int, std::string);
     MAKE_EVENT_ADD(EventAddMoreArg, int, std::string);
+
+    MAKE_EVENT_ADD(TestRemove, std::string);
 };
 
 static void full_test() {
@@ -60,6 +63,19 @@ static void full_test() {
             printf("addEventAddMoreArgCb: %d, %s\n", arg1, arg2.c_str());
         });
         test.onEventAddMoreArg(1, "hello");
+    }
+
+    {
+        test.removeAllTestRemoveCbs(); // only for test compile
+        assert(test.removeTestRemoveCbById(1) == 0);
+
+        auto id = test.addTestRemoveCb([](const std::string& arg) {
+            printf("addTestRemoveCb: %s\n", arg.c_str());
+        });
+        assert(id == 1); // start from 1
+        id = test.removeTestRemoveCbById(id);
+        assert(id == 1); // return removed id
+        test.onTestRemove("should not output!");
     }
 }
 

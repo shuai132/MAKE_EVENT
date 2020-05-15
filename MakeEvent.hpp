@@ -30,14 +30,34 @@
 
 
 #define _MAKE_EVENT_DEF_ADD(name, ...) \
+        using name##EventID_t = unsigned int; \
         using name##Cb##_t = std::function<void(__VA_ARGS__)>; \
+        using name##Cb##Pair_t = std::pair<name##EventID_t, std::function<void(__VA_ARGS__)>>; \
         private: \
-        std::vector<name##Cb##_t> _cbs##name; \
+        name##EventID_t _cbs##name##ID##Count = 0; \
+        std::vector<name##Cb##Pair_t> _cbs##name; \
 
 #define _MAKE_EVENT_FUN_ADD(name, ...) \
         public: \
-        inline void add##name##Cb(name##Cb##_t cb) { \
-            _cbs##name.emplace_back(std::move(cb)); \
+        inline name##EventID_t add##name##Cb(name##Cb##_t cb) { \
+            auto id = ++_cbs##name##ID##Count; \
+            _cbs##name.emplace_back(std::make_pair(id, std::move(cb))); \
+            return id; \
+        } \
+        inline name##EventID_t remove##name##CbById(name##EventID_t id) { \
+            for (auto it = _cbs##name.cbegin(); it != _cbs##name.cend();) { \
+                const auto& item = *it; \
+                if (item.first == id) { \
+                    _cbs##name.erase(it); \
+                    return id; \
+                } else { \
+                    it++; \
+                } \
+            } \
+            return 0; \
+        } \
+        inline void removeAll##name##Cbs(){ \
+            _cbs##name.clear(); \
         } \
 
 #define _MAKE_EVENT_TRI_ADD(name, ...) \
@@ -45,7 +65,7 @@
         template<typename... Args> \
         inline void on##name(Args&&... args) { \
             for (const auto& cb : _cbs##name) { \
-                cb(std::forward<Args>(args)...); \
+                cb.second(std::forward<Args>(args)...); \
             } \
         } \
 
