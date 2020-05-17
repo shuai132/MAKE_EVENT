@@ -1,13 +1,18 @@
 #pragma once
 
+#ifndef NO_FUNCTIONAL
 #include <functional>
+#define CB_TYPE(...) std::function<void(__VA_ARGS__)>
+#else
+#define CB_TYPE(...) void(*)(__VA_ARGS__)
+#endif
 #include <vector>
 #include <utility>
 
 #define _MAKE_EVENT_DEF_SET(name, ...) \
-        using name##Cb##_t = std::function<void(__VA_ARGS__)>; \
+        using name##Cb##_t = CB_TYPE(__VA_ARGS__); \
         private: \
-        name##Cb##_t _cb##name; \
+        name##Cb##_t _cb##name = nullptr; \
 
 #define _MAKE_EVENT_FUN_SET(name, ...) \
         public: \
@@ -41,8 +46,8 @@
                 return value == other.value; \
             } \
         }; \
-        using name##Cb##_t = std::function<void(__VA_ARGS__)>; \
-        using name##Cb##Pair_t = std::pair<name##CbID_t, std::function<void(__VA_ARGS__)>>; \
+        using name##Cb##_t = CB_TYPE(__VA_ARGS__); \
+        using name##Cb##Pair_t = std::pair<name##CbID_t, CB_TYPE(__VA_ARGS__)>; \
         private: \
         name##CbID_t _cbs##name##ID##Count = 0; \
         std::vector<name##Cb##Pair_t> _cbs##name; \
@@ -55,7 +60,7 @@
             return id; \
         } \
         inline name##CbID_t remove##name##CbById(name##CbID_t id) { \
-            for (auto it = _cbs##name.cbegin(); it != _cbs##name.cend();) { \
+            for (auto it = _cbs##name.begin(); it != _cbs##name.end();) { \
                 const auto& item = *it; \
                 if (item.first == id) { \
                     _cbs##name.erase(it); \

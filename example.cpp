@@ -1,5 +1,7 @@
 #include <string>
 #include <cassert>
+
+//#define NO_FUNCTIONAL
 #include "MakeEvent.hpp"
 
 class SimpleTest {
@@ -11,7 +13,7 @@ class SimpleTest {
 
 static void simple_test() {
     SimpleTest test;
-    test.setDestroyCb([](int arg1, const std::string& arg2){
+    test.setDestroyCb([](int arg1, std::string arg2){
         printf("destroy callback: %d, %s\n", arg1, arg2.c_str());
     });
 }
@@ -54,12 +56,12 @@ static void full_test() {
         test.onEventAddOneArg(1);
     }
     {
-        test.setEventSetMoreArgCb([](int arg1, const std::string& arg2){
+        test.setEventSetMoreArgCb([](int arg1, std::string arg2){
             printf("setEventSetMoreArgCb: %d, %s\n", arg1, arg2.c_str());
         });
         test.onEventSetMoreArg(1, "hello");
 
-        test.addEventAddMoreArgCb([](int arg1, const std::string& arg2) {
+        test.addEventAddMoreArgCb([](int arg1, std::string arg2) {
             printf("addEventAddMoreArgCb: %d, %s\n", arg1, arg2.c_str());
         });
         test.onEventAddMoreArg(1, "hello");
@@ -69,7 +71,7 @@ static void full_test() {
         test.removeAllTestRemoveCbs(); // only for test compile
         assert(test.removeTestRemoveCbById(1) == 0);
 
-        auto id = test.addTestRemoveCb([](const std::string& arg) {
+        auto id = test.addTestRemoveCb([](std::string arg) {
             printf("addTestRemoveCb: %s\n", arg.c_str());
         });
         assert(id == 1); // start from 1
